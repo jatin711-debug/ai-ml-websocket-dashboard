@@ -56,9 +56,9 @@ const PredictionDashboard = () => {
   };
 
   const getStatusColor = (probability) => {
-    if (probability < 0.3) return 'text-green-500';
-    if (probability < 0.7) return 'text-yellow-500';
-    return 'text-red-500';
+    if (probability < 0.3) return 'text-green-400';
+    if (probability < 0.7) return 'text-yellow-400';
+    return 'text-red-400';
   };
 
   const getHealthStatus = (failureProbability) => {
@@ -100,17 +100,17 @@ const PredictionDashboard = () => {
   }, [timeRange]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex flex-col gap-6">
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col gap-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-gray-800">Predictive Maintenance Dashboard</h1>
+      <div className="flex justify-between items-center bg-gray-800 p-4 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-gray-200">Predictive Maintenance Dashboard</h1>
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <CheckCircle className="text-green-500" size={24} />
+            <CheckCircle className="text-green-400" size={24} />
           ) : (
-            <WifiOff className="text-red-500" size={24} />
+            <WifiOff className="text-red-400" size={24} />
           )}
-          <span className={isConnected ? 'text-green-500' : 'text-red-500'}>
+          <span className={isConnected ? 'text-green-400' : 'text-red-400'}>
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
         </div>
@@ -118,11 +118,11 @@ const PredictionDashboard = () => {
 
       {/* Last Prediction */}
       {lastPrediction && (
-        <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-4">
+        <div className="bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4">
           {lastPrediction.prediction === 0 ? (
-            <CheckCircle className="text-green-500" size={32} />
+            <CheckCircle className="text-green-400" size={32} />
           ) : (
-            <AlertTriangle className="text-red-500" size={32} />
+            <AlertTriangle className="text-red-400" size={32} />
           )}
           <div>
             <h2 className="text-lg font-semibold">
@@ -139,14 +139,14 @@ const PredictionDashboard = () => {
 
       {/* Health Status */}
       {healthStatus && (
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="bg-gray-800 p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-bold mb-4">System Health Status</h2>
           <div>
             <p className="text-sm font-medium">Average Failure Probability: {healthStatus.average_failure_probability * 100}%</p>
             <p className="text-sm font-medium">Average Temperature: {healthStatus.average_temperature}°C</p>
             <p className="text-sm font-medium">High Risk Events: {healthStatus.high_risk_count}</p>
             <p className="text-sm font-medium">High Temperature Events: {healthStatus.high_temperature_count}</p>
-            <h3 className={`text-xl font-bold ${healthStatus.status === 'At Risk' ? 'text-red-500' : 'text-green-500'}`}>
+            <h3 className={`text-xl font-bold ${healthStatus.status === 'At Risk' ? 'text-red-400' : 'text-green-400'}`}>
               Status: {healthStatus.status}
             </h3>
           </div>
@@ -154,38 +154,40 @@ const PredictionDashboard = () => {
       )}
 
       {/* Line Chart */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md">
         <h2 className="text-lg font-bold mb-4">Failure Probability Over Time</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={predictionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="gray" />
             <XAxis
               dataKey="timestamp"
               tickFormatter={formatTimestamp}
               interval="preserveEnd"
               tick={{ fontSize: 12 }}
+              stroke="gray"
             />
-            <YAxis domain={[0, 1]} tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
+            <YAxis domain={[0, 1]} tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} stroke="gray" />
             <Tooltip
               labelFormatter={formatTimestamp}
               formatter={(value) => [`${(value * 100).toFixed(2)}%`, 'Failure Risk']}
+              wrapperStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', color: '#fff' }}
             />
-            <Line type="monotone" dataKey="failure_probability" stroke="#2563eb" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="failure_probability" stroke="#4F83CC" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Sensor Data */}
       {lastPrediction?.sensor_data && (
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="bg-gray-800 p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-bold mb-4">Latest Sensor Data</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {Object.entries(lastPrediction.sensor_data).map(([key, value]) => (
-              <div key={key} className="p-4 bg-gray-50 rounded-lg shadow-sm">
-                <h3 className="text-sm font-medium text-gray-500">
+              <div key={key} className="p-4 bg-gray-700 rounded-lg shadow-sm">
+                <h3 className="text-sm font-medium text-gray-400">
                   {key.replace('_', ' ').toUpperCase()}
                 </h3>
-                <p className="text-lg font-semibold text-gray-800">
+                <p className="text-lg font-semibold text-gray-100">
                   {typeof value === 'number' ? value.toFixed(2) : value}
                 </p>
               </div>
@@ -195,11 +197,11 @@ const PredictionDashboard = () => {
       )}
 
       {/* Maintenance Log */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md">
         <h2 className="text-lg font-bold mb-4">Maintenance Log</h2>
         <ul>
           {maintenanceLog.map((log, idx) => (
-            <li key={idx} className="text-sm text-gray-600">
+            <li key={idx} className="text-sm text-gray-400">
               {log.time}: {log.action}
             </li>
           ))}
@@ -207,7 +209,7 @@ const PredictionDashboard = () => {
       </div>
 
       {/* Model Performance Metrics */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md">
         <h2 className="text-lg font-bold mb-4">Model Performance Metrics</h2>
         <ul>
           <li>Accuracy: {metrics.accuracy}</li>
@@ -218,38 +220,29 @@ const PredictionDashboard = () => {
       </div>
 
       {/* Control Panel for Thresholds and Time Range */}
-      <div className="bg-white p-4 rounded-lg shadow-md flex gap-4">
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md flex gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Temperature Threshold</label>
+          <label className="block text-sm font-medium text-gray-400">Temperature Threshold</label>
           <input
             type="number"
             value={temperatureThreshold}
             onChange={handleThresholdChange}
-            className="mt-1 block w-24 border border-gray-300 rounded-lg p-2"
+            className="mt-1 block w-24 border border-gray-600 bg-gray-700 text-white rounded-lg p-2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Time Range</label>
+          <label className="block text-sm font-medium text-gray-400">Time Range</label>
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="mt-1 block w-40 border border-gray-300 rounded-lg p-2"
+            className="mt-1 block w-32 bg-gray-700 text-white border border-gray-600 rounded-lg p-2"
           >
-            <option value="24h">Last 24 Hours</option>
-            <option value="1w">Last 1 Week</option>
-            <option value="1m">Last 1 Month</option>
+            <option value="24h">Last 24 hours</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
           </select>
         </div>
-      </div>
-
-      {/* Export Button */}
-      <div className="bg-white p-4 rounded-lg shadow-md flex justify-end">
-        <button
-          onClick={exportToCSV}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700"
-        >
-          Export Data
-        </button>
+        <button onClick={exportToCSV} className="bg-blue-600 p-2 rounded-lg text-white">Export to CSV</button>
       </div>
     </div>
   );
