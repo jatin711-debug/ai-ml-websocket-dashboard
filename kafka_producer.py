@@ -1,3 +1,4 @@
+import pandas as pd
 from kafka import KafkaProducer
 import json
 import time
@@ -14,25 +15,25 @@ class SensorDataProducer:
         )
         self.setup_logging()
         
-        # Initialize base parameters for the machine
+        # Initialize base parameters for the machine (normal values)
         self.base_params = {
-            'temperature': 60.0,
-            'vibration': 1.0,
-            'pressure': 100.0,
-            'rotation_speed': 1100.0,
-            'power_consumption': 80.0,
-            'noise_level': 70.0,
+            'temperature': 60.0,  # Normal temperature
+            'vibration': 1.0,     # Normal vibration
+            'pressure': 100.0,    # Normal pressure
+            'rotation_speed': 1100.0,  # Normal rotation speed
+            'power_consumption': 80.0,  # Normal power consumption
+            'noise_level': 70.0,     # Normal noise level
             'operating_hours': 0.0
         }
         
-        # Deterioration rates per hour
+        # Deterioration rates to simulate wear and tear for error-prone readings
         self.deterioration_rates = {
-            'temperature': 0.1,
-            'vibration': 0.01,
-            'pressure': -0.05,
-            'rotation_speed': -0.5,
-            'power_consumption': 0.2,
-            'noise_level': 0.1
+            'temperature': 0.2,
+            'vibration': 0.05,
+            'pressure': -0.1,
+            'rotation_speed': -1.0,
+            'power_consumption': 0.5,
+            'noise_level': 0.2
         }
 
     def setup_logging(self):
@@ -52,30 +53,59 @@ class SensorDataProducer:
         # Update operating hours
         self.base_params['operating_hours'] += 1/60  # Assuming readings every minute
         
-        # Generate readings for each sensor
-        for param, base_value in self.base_params.items():
-            if param == 'operating_hours':
-                current_reading[param] = base_value
-                continue
+        # Randomly decide whether to generate a normal or error-prone reading (50/50 chance)
+        is_error = np.random.rand() > 0.5  # 50% chance for error
+        
+        # If error-prone, apply higher values and rapid deterioration
+        if is_error:
+            for param, base_value in self.base_params.items():
+                if param == 'operating_hours':
+                    current_reading[param] = base_value
+                    continue
                 
-            # Add deterioration effect
-            deterioration = self.deterioration_rates.get(param, 0) * (self.base_params['operating_hours'] / 24)
-            
-            # Add random noise
-            noise_factor = {
-                'temperature': 1.0,
-                'vibration': 0.1,
-                'pressure': 0.5,
-                'rotation_speed': 10.0,
-                'power_consumption': 1.0,
-                'noise_level': 0.5
-            }.get(param, 0.1)
-            
-            noise = np.random.normal(0, noise_factor)
-            
-            # Calculate final value
-            value = base_value + deterioration + noise
-            current_reading[param] = round(value, 2)
+                # Apply exaggerated deterioration for error state
+                deterioration = self.deterioration_rates.get(param, 0) * 2 * (self.base_params['operating_hours'] / 24)  # Double deterioration
+                
+                # Add random noise with higher noise factor for errors
+                noise_factor = {
+                    'temperature': 5.0,  # Exaggerated noise for temperature
+                    'vibration': 1.0,    # Exaggerated noise for vibration
+                    'pressure': 2.0,     # Exaggerated noise for pressure
+                    'rotation_speed': 50.0,  # Exaggerated noise for rotation speed
+                    'power_consumption': 3.0,  # Exaggerated noise for power consumption
+                    'noise_level': 3.0   # Exaggerated noise for noise level
+                }.get(param, 0.1)
+                
+                noise = np.random.normal(0, noise_factor)
+                
+                # Calculate final error-prone value
+                value = base_value + deterioration + noise
+                current_reading[param] = round(value, 2)
+        else:
+            # For normal readings, generate values within expected ranges
+            for param, base_value in self.base_params.items():
+                if param == 'operating_hours':
+                    current_reading[param] = base_value
+                    continue
+                
+                # Apply normal deterioration
+                deterioration = self.deterioration_rates.get(param, 0) * (self.base_params['operating_hours'] / 24)
+                
+                # Add random noise with standard noise factor
+                noise_factor = {
+                    'temperature': 2.0,
+                    'vibration': 0.2,
+                    'pressure': 1.0,
+                    'rotation_speed': 20.0,
+                    'power_consumption': 1.0,
+                    'noise_level': 1.0
+                }.get(param, 0.1)
+                
+                noise = np.random.normal(0, noise_factor)
+                
+                # Calculate final normal value
+                value = base_value + deterioration + noise
+                current_reading[param] = round(value, 2)
 
         return current_reading
 
@@ -83,12 +113,12 @@ class SensorDataProducer:
         """Reset parameters after maintenance"""
         logging.info("Simulating maintenance - resetting parameters")
         self.base_params = {
-            'temperature': np.random.uniform(58, 62),
-            'vibration': np.random.uniform(0.9, 1.1),
-            'pressure': np.random.uniform(98, 102),
-            'rotation_speed': np.random.uniform(1080, 1120),
-            'power_consumption': np.random.uniform(78, 82),
-            'noise_level': np.random.uniform(68, 72),
+            'temperature': np.random.uniform(60, 65),  # Normal range after maintenance
+            'vibration': np.random.uniform(1.0, 1.2),  # Normal range after maintenance
+            'pressure': np.random.uniform(98, 102),    # Normal range after maintenance
+            'rotation_speed': np.random.uniform(1100, 1150),  # Normal range after maintenance
+            'power_consumption': np.random.uniform(78, 82),  # Normal range after maintenance
+            'noise_level': np.random.uniform(68, 72),  # Normal range after maintenance
             'operating_hours': 0.0
         }
 
@@ -130,7 +160,7 @@ def main():
     producer = SensorDataProducer()
     
     # Set interval to 10 seconds for testing (adjust as needed)
-    producer.start_producing(interval_seconds=10)
+    producer.start_producing(interval_seconds=3)
 
 if __name__ == "__main__":
     main()
